@@ -13,6 +13,11 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
 
     "A neighborhood actor" must {
 
+      "initialize with 0 homes" in {
+        val neighborhood = system.actorOf(Props(new NeighborhoodActor("one house")))
+        neighborhood ! HomeCount()
+        expectMsg(0)
+      }
       "build a new house" in {
         val neighborhood = system.actorOf(Props(new NeighborhoodActor("one house")))
         val buildHouse = BuildHouse("1234 Main St")
