@@ -1,6 +1,6 @@
 package com.lochnesh.neighbors.actors
 
-import akka.persistence.PersistentActor
+import akka.persistence.{SnapshotOffer, PersistentActor}
 
 //commands
 case class BuildHouse(address: String)
@@ -17,8 +17,8 @@ case class NeighborhoodState(houses: List[String] = Nil) {
   override def toString: String = houses.reverse.toString
 }
 
-class NeighborhoodActor extends PersistentActor {
-  override def persistenceId: String = "neighborhood-actor"
+class NeighborhoodActor(id: String) extends PersistentActor {
+  override def persistenceId: String = id
 
   var state = NeighborhoodState()
 
@@ -27,12 +27,16 @@ class NeighborhoodActor extends PersistentActor {
   def houses: Seq[String] = state.houses
 
   override def receiveRecover: Receive = {
-    case _ ⇒ println("receiveRecover")
+      case evt: HouseBuilt => updateState(evt)
+      case SnapshotOffer(_, snapshot: NeighborhoodState) => state = snapshot
   }
 
   override def receiveCommand: Receive = {
     case cmd: BuildHouse ⇒
+      if (houses.contains(cmd.address)) {
+        sender() ! s"there is already a house at ${cmd.address}"
+      }
       persist(HouseBuilt(cmd.address))(updateState)
-      sender() ! "house built"
+      sender() ! s"house built ${cmd.address}"
   }
 }
