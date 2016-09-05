@@ -1,6 +1,6 @@
 package com.lochnesh.neighbors.actors
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
@@ -14,9 +14,10 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
     "A neighborhood actor" must {
 
       "build new homes" in {
-        val neighborhood: ActorRef = system.actorOf(Props[NeighborhoodActor])
+        val neighborhood = system.actorOf(Props[NeighborhoodActor])
         val buildHouse = BuildHouse("1234 Main St")
         neighborhood ! buildHouse
+        expectMsg("house built")
       }
 
     }

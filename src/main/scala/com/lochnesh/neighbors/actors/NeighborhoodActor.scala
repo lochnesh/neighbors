@@ -9,7 +9,10 @@ case class BuildHouse(address: String)
 case class HouseBuilt(address: String)
 
 case class NeighborhoodState(houses: List[String] = Nil) {
-  def updated(evt: HouseBuilt): NeighborhoodState = copy(evt.address :: houses)
+  def updated(evt: HouseBuilt): NeighborhoodState = {
+    println("appending a house")
+    copy(evt.address :: houses)
+  }
   def size: Int = houses.length
   override def toString: String = houses.reverse.toString
 }
@@ -28,6 +31,8 @@ class NeighborhoodActor extends PersistentActor {
   }
 
   override def receiveCommand: Receive = {
-    case cmd: BuildHouse ⇒ persist(HouseBuilt(cmd.address))(updateState)
+    case cmd: BuildHouse ⇒
+      persist(HouseBuilt(cmd.address))(updateState)
+      sender() ! "house built"
   }
 }
