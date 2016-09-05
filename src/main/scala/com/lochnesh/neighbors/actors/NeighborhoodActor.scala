@@ -4,15 +4,13 @@ import akka.persistence.{SnapshotOffer, PersistentActor}
 
 //commands
 case class BuildHouse(address: String)
+case class HomeCount()
 
 //events
 case class HouseBuilt(address: String)
 
 case class NeighborhoodState(houses: List[String] = Nil) {
-  def updated(evt: HouseBuilt): NeighborhoodState = {
-    println("appending a house")
-    copy(evt.address :: houses)
-  }
+  def updated(evt: HouseBuilt): NeighborhoodState = copy(evt.address :: houses)
   def size: Int = houses.length
   override def toString: String = houses.reverse.toString
 }
@@ -35,8 +33,11 @@ class NeighborhoodActor(id: String) extends PersistentActor {
     case cmd: BuildHouse ⇒
       if (houses.contains(cmd.address)) {
         sender() ! s"there is already a house at ${cmd.address}"
+      } else {
+        persist(HouseBuilt(cmd.address))(updateState)
+        sender() ! s"house built ${cmd.address}"
       }
-      persist(HouseBuilt(cmd.address))(updateState)
-      sender() ! s"house built ${cmd.address}"
+
+    case count: HomeCount ⇒ sender() ! houses.size
   }
 }

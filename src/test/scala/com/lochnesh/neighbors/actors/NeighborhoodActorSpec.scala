@@ -18,6 +18,8 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
         val buildHouse = BuildHouse("1234 Main St")
         neighborhood ! buildHouse
         expectMsg("house built 1234 Main St")
+        neighborhood ! HomeCount()
+        expectMsg(1)
       }
 
       "build many new houses" in {
@@ -28,15 +30,19 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
         neighborhood ! centerSt
         expectMsg("house built 1234 Main St")
         expectMsg("house built 1234 Center St")
+        neighborhood ! HomeCount()
+        expectMsg(2)
       }
 
       "not build multiple homes at the same address" in {
         val neighborhood = system.actorOf(Props(new NeighborhoodActor("duplicate houses")))
         val mainSt = BuildHouse("1234 Main St")
         neighborhood ! mainSt
-        neighborhood ! mainSt
         expectMsg("house built 1234 Main St")
+        neighborhood ! mainSt
         expectMsg("there is already a house at 1234 Main St")
+        neighborhood ! HomeCount()
+        expectMsg(1)
       }
 
     }
