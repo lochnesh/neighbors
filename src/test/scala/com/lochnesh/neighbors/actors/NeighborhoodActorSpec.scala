@@ -1,6 +1,6 @@
 package com.lochnesh.neighbors.actors
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
@@ -21,17 +21,15 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
     "A neighborhood actor" must {
 
       "initialize with 0 homes" in {
-        fixture.neighborhood ! HomeCount()
-        expectMsg(0)
+        assertHomeCount(fixture.neighborhood, 0)
       }
 
       "build a new house" in {
-        val neighborhood = fixture.neighborhood
+        val neighborhood: ActorRef = fixture.neighborhood
         val buildHouse = BuildHouse("1234 Main St")
         neighborhood ! buildHouse
         expectMsg("house built 1234 Main St")
-        neighborhood ! HomeCount()
-        expectMsg(1)
+        assertHomeCount(neighborhood, 1)
       }
 
       "build many new houses" in {
@@ -42,8 +40,7 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
         neighborhood ! centerSt
         expectMsg("house built 1234 Main St")
         expectMsg("house built 1234 Center St")
-        neighborhood ! HomeCount()
-        expectMsg(2)
+        assertHomeCount(neighborhood, 2)
       }
 
       "not build multiple homes at the same address" in {
@@ -53,8 +50,12 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
         expectMsg("house built 1234 Main St")
         neighborhood ! mainSt
         expectMsg("there is already a house at 1234 Main St")
-        neighborhood ! HomeCount()
-        expectMsg(1)
+        assertHomeCount(neighborhood, 1)
       }
+    }
+
+    def assertHomeCount(n: ActorRef, count: Int): Unit = {
+      n ! HomeCount()
+      expectMsg(count)
     }
   }
