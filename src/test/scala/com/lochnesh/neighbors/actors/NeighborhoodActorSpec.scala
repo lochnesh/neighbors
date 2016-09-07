@@ -2,10 +2,17 @@ package com.lochnesh.neighbors.actors
 
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.{BeforeAndAfterEach, BeforeAndAfterAll, Matchers, WordSpecLike}
 
 class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")) with ImplicitSender
-  with WordSpecLike with Matchers with BeforeAndAfterAll {
+  with WordSpecLike with Matchers with BeforeAndAfterEach with BeforeAndAfterAll {
+
+    private def fixture = {
+      new {
+        val length = 15
+        val neighborhood = system.actorOf(Props(new NeighborhoodActor(scala.util.Random.alphanumeric.take(length).mkString)))
+      }
+    }
 
     override def afterAll {
       TestKit.shutdownActorSystem(system)
@@ -14,12 +21,12 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
     "A neighborhood actor" must {
 
       "initialize with 0 homes" in {
-        val neighborhood = system.actorOf(Props(new NeighborhoodActor("one house")))
-        neighborhood ! HomeCount()
+        fixture.neighborhood ! HomeCount()
         expectMsg(0)
       }
+
       "build a new house" in {
-        val neighborhood = system.actorOf(Props(new NeighborhoodActor("one house")))
+        val neighborhood = fixture.neighborhood
         val buildHouse = BuildHouse("1234 Main St")
         neighborhood ! buildHouse
         expectMsg("house built 1234 Main St")
@@ -28,7 +35,7 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
       }
 
       "build many new houses" in {
-        val neighborhood = system.actorOf(Props(new NeighborhoodActor("multiple houses")))
+        val neighborhood = fixture.neighborhood
         val mainSt = BuildHouse("1234 Main St")
         val centerSt = BuildHouse("1234 Center St")
         neighborhood ! mainSt
@@ -40,7 +47,7 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
       }
 
       "not build multiple homes at the same address" in {
-        val neighborhood = system.actorOf(Props(new NeighborhoodActor("duplicate houses")))
+        val neighborhood = fixture.neighborhood
         val mainSt = BuildHouse("1234 Main St")
         neighborhood ! mainSt
         expectMsg("house built 1234 Main St")
