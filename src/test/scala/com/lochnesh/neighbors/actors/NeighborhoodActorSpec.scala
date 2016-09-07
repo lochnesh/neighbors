@@ -21,8 +21,7 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
     "A neighborhood actor" must {
 
       "initialize with 0 homes" in {
-        fixture.neighborhood ! HomeCount()
-        expectMsg(0)
+        assertHomeCount(0)
       }
 
       "build a new house" in {
@@ -30,8 +29,7 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
         val buildHouse = BuildHouse("1234 Main St")
         neighborhood ! buildHouse
         expectMsg("house built 1234 Main St")
-        neighborhood ! HomeCount()
-        expectMsg(1)
+        assertHomeCount(1)
       }
 
       "build many new houses" in {
@@ -42,8 +40,7 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
         neighborhood ! centerSt
         expectMsg("house built 1234 Main St")
         expectMsg("house built 1234 Center St")
-        neighborhood ! HomeCount()
-        expectMsg(2)
+        assertHomeCount(2)
       }
 
       "not build multiple homes at the same address" in {
@@ -53,9 +50,13 @@ class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")
         expectMsg("house built 1234 Main St")
         neighborhood ! mainSt
         expectMsg("there is already a house at 1234 Main St")
-        neighborhood ! HomeCount()
-        expectMsg(1)
+        assertHomeCount(1)
       }
 
+    }
+
+    private def assertHomeCount(count: Int) = {
+      fixture.neighborhood ! HomeCount()
+      expectMsg(count)
     }
   }
