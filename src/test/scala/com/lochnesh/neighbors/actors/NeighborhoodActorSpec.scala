@@ -2,10 +2,10 @@ package com.lochnesh.neighbors.actors
 
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
-import org.scalatest.{BeforeAndAfterEach, BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 class NeighborhoodActorSpec extends TestKit(ActorSystem("NeighborhoodActorSpec")) with ImplicitSender
-  with WordSpecLike with Matchers with BeforeAndAfterEach with BeforeAndAfterAll {
+  with WordSpecLike with Matchers with BeforeAndAfterAll {
 
     private def fixture = {
       new {
